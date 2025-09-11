@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><link rel="icon" type="image/x-icon" href="https://i.ibb.co/tP3DmRxS/clidder-new-icon.webp">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Black Hat Services</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: #000;
+      background: url("https://i.ibb.co/840yZ5qQ/bgp.png") no-repeat center center/cover;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .mica-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(30px) saturate(180%) brightness(1.05);
+      -webkit-backdrop-filter: blur(30px) saturate(180%) brightness(1.05);
+      z-index: 0;
+    }
+
+    /* Popup */
+    .popup {
+      position: relative;
+      z-index: 1;
+      background: #fff;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      width: 600px;
+      max-width: 90%;
+      max-height: 80%;
+      padding: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .popup h2 {
+      margin: 0 0 10px;
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .popup .agreement-text {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 10px;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .popup .checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0;
+      font-size: 0.9rem;
+    }
+
+    .popup .buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .popup button {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .popup .accept {
+      background: #ff6600;
+      color: white;
+    }
+
+    .popup .accept:disabled {
+      background: #ffb380;
+      cursor: not-allowed;
+    }
+
+    .popup .decline {
+      background: #eee;
+      color: #000;
+    }
+
+    /* Loading text */
+    .message {
+      position: absolute;
+      top: 12vh;
+      font-size: 1.6rem;
+      font-weight: 500;
+      text-align: center;
+      display: none;
+    }
+
+    /* Circle */
+    .circle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+    }
+
+    .circleWrapper {
+      position: relative;
+      width: 180px;
+      height: 180px;
+    }
+
+    svg {
+      width: 180px;
+      height: 180px;
+      transform: rotate(-90deg);
+    }
+
+    .percentage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2rem;
+      font-weight: bold;
+      color: #000;
+      text-align: center;
+    }
+
+    /* Logo */
+    .logo {
+      position: absolute;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+    }
+
+    .logo img {
+      width: 55px;
+      height: 55px;
+    }
+
+    /* Decline screen */
+    .decline-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(20px);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.5rem;
+      font-weight: 500;
+      z-index: 10;
+    }
+
+    .decline-loading {
+      margin-top: 20px;
+      width: 50%;
+      max-width: 400px;
+      height: 8px;
+      background: #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .decline-loading-fill {
+      width: 0%;
+      height: 100%;
+      background: #cc0000;
+      transition: width 3s linear;
+    }
+
+    /* Final motivational screens */
+    .fade-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.8rem;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+      text-align: center;
+      z-index: 5;
+    }
+
+    /* Final Windows-style boot screen */
+    .final-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      color: #fff;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+    }
+
+    .final-screen h1 {
+      font-size: 2rem;
+      margin: 15px 0 30px;
+    }
+
+    .final-logo img {
+      width: 80px;
+      height: 80px;
+    }
+
+    .loading-bar {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40%;
+      height: 6px;
+      background: #333;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .loading-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: #ff6600;
+      transition: width 5s linear;
+    }
+/* Scrollbar styling for Webkit browsers (Chrome, Edge, Safari, Opera) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #ff6600; /* Orange */
+  border-radius: 10px;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #ff6600 transparent;
+}
+
+/* Disable text selection, dragging, and image dragging */
+* {
+  -webkit-user-select: none; /* Chrome, Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE/Edge */
+  user-select: none;         /* Standard */
+  
+  -webkit-user-drag: none;   /* Disable image dragging in Safari/Chrome */
+  user-drag: none;           /* Standard */
+}
+
+  </style>
+</head>
+<body>
+  <div class="mica-overlay"></div>
+
+  <!-- Popup -->
+  <div class="popup" id="agreementPopup">
+    <h2 class="text-2xl font-bold mb-4">Black Hat OS – License & Cookie Agreement</h2>
+<div class="agreement-text max-h-[700px] overflow-y-auto p-6 border rounded-lg bg-gray-900 text-gray-200 text-sm leading-relaxed space-y-6">
+
+  <p>
+    This License & Cookie Agreement (“Agreement”) is a legally binding document between you (the “User”) and 
+    <strong>Black Hat Services</strong> (“Provider”), governing the installation, access, and use of the Black Hat Operating 
+    System (“Black Hat OS”), its components, updates, and associated services. Please read carefully before proceeding. 
+    By continuing installation or using Black Hat OS, you agree to be bound by this Agreement. If you do not agree, 
+    decline installation and discontinue use immediately.
+  </p>
+
+  <!-- SECTION 1 -->
+  <h3 class="text-lg font-semibold">1. License Grant</h3>
+  <ul class="list-disc pl-6 space-y-2">
+    <li>You are granted a limited, non-exclusive, non-transferable license to install and use Black Hat OS on supported hardware.</li>
+    <li>The license permits personal, educational, research, and authorized business use only.</li>
+    <li>All rights not expressly granted are reserved by Black Hat Services.</li>
+    <li>No ownership of intellectual property is transferred by this license.</li>
+  </ul>
+
+  <!-- SECTION 2 -->
+  <h3 class="text-lg font-semibold">2. License Restrictions</h3>
+  <ul class="list-disc pl-6 space-y-2">
+    <li>You may not modify, decompile, reverse engineer, or distribute derivative works of Black Hat OS without explicit written permission.</li>
+    <li>The OS may not be used for unlawful activities, cyberattacks, unauthorized data collection, or fraud.</li>
+    <li>You may not circumvent security protections, encryption mechanisms, or licensing restrictions.</li>
+    <li>Deployment in life-support systems, aviation, military control, or nuclear operations is strictly prohibited.</li>
+  </ul>
+
+  <!-- SECTION 3 -->
+  <h3 class="text-lg font-semibold">3. Data Collection & Privacy Policy</h3>
+  <p>
+    Black Hat OS includes features that collect diagnostic and operational data to ensure system stability, enhance 
+    performance, and secure the environment. By using Black Hat OS, you consent to the collection and processing of data, 
+    which may include:
+  </p>
+  <ul class="list-disc pl-6 space-y-2">
+    <li>Hardware specifications, operating system version, and driver information.</li>
+    <li>Crash reports, error logs, and performance metrics.</li>
+    <li>Application usage statistics and feature interactions (anonymized).</li>
+    <li>Security-related events, including failed login attempts and intrusion alerts.</li>
+  </ul>
+  <p>
+    Black Hat Services will not sell personally identifiable data to third parties. Aggregated or anonymized data may be 
+    shared with trusted partners for analytics, research, and improvement purposes. You may opt-out of certain telemetry 
+    features, though this may reduce system functionality.
+  </p>
+
+  <!-- SECTION 4 -->
+  <h3 class="text-lg font-semibold">4. Cookie Policy</h3>
+  <p>
+    Black Hat OS services, including the integrated package manager, update system, and online portals, may use cookies 
+    to store session data and improve user experience:
+  </p>
+  <ul class="list-disc pl-6 space-y-2">
+    <li><strong>Essential Cookies</strong> – Required for authentication, session management, and secure access.</li>
+    <li><strong>Functional Cookies</strong> – Store themes, layouts, and system preferences.</li>
+    <li><strong>Performance Cookies</strong> – Collect system responsiveness and stability metrics.</li>
+    <li><strong>Analytics Cookies</strong> – Track anonymized patterns to improve features and usability.</li>
+  </ul>
+  <p>
+    Cookies may be disabled in system settings or browsers, but doing so may limit functionality or prevent updates.
+  </p>
+
+  <!-- SECTION 5 -->
+  <h3 class="text-lg font-semibold">5. Security & Encryption</h3>
+  <ul class="list-disc pl-6 space-y-2">
+    <li>Black Hat OS includes built-in encryption, sandboxing, and secure boot mechanisms to protect your data.</li>
+    <li>You are responsible for safeguarding encryption keys, passwords, and authentication credentials.</li>
+    <li>Failure to apply security patches may expose the system to vulnerabilities. Black Hat Services is not responsible for unpatched systems.</li>
+    <li>The OS may monitor for suspicious activity, unauthorized privilege escalation, or tampering attempts.</li>
+  </ul>
+
+  <!-- SECTION 6 -->
+  <h3 class="text-lg font-semibold">6. Updates & Experimental Features</h3>
+  <ul class="list-disc pl-6 space-y-2">
+    <li>Black Hat OS may install automatic updates, including critical security fixes, without prior notice.</li>
+    <li>Experimental or beta features may be unstable, incomplete, or removed in future versions.</li>
+    <li>You assume all risk associated with enabling developer or experimental modes.</li>
+  </ul>
+
+  <!-- SECTION 7 -->
+  <h3 class="text-lg font-semibold">7. Virtualization & Third-Party Applications</h3>
+  <ul class="list-disc pl-6 space-y-2">
+    <li>You may run Black Hat OS in a virtual environment only if it complies with the license terms.</li>
+    <li>Third-party applications are subject to their own licenses and are not covered by this Agreement.</li>
+    <li>Black Hat Services is not responsible for security breaches, instability, or damages caused by third-party software.</li>
+  </ul>
+
+  <!-- SECTION 8 -->
+  <h3 class="text-lg font-semibold">8. Community Conduct</h3>
+  <ul class="list-disc pl-6 space-y-2">
+    <li>When using Black Hat OS online services, you must adhere to community rules and ethical standards.</li>
+    <li>Prohibited conduct includes harassment, hate speech, illegal activity, or distribution of harmful content.</li>
+    <li>Violations may result in account suspension, license revocation, or legal action.</li>
+  </ul>
+
+  <!-- SECTION 9 -->
+  <h3 class="text-lg font-semibold">9. Disclaimer of Warranties</h3>
+  <ul class="list-disc pl-6 space-y-2">
+    <li>Black Hat OS is provided “as is” without any warranties, express or implied.</li>
+    <li>No guarantee is provided that the OS will meet your requirements, run uninterrupted, or be error-free.</li>
+    <li>Black Hat Services disclaims responsibility for any damages arising from use or misuse.</li>
+  </ul>
+
+  <!-- SECTION 10 -->
+  <h3 class="text-lg font-semibold">10. Limitation of Liability</h3>
+  <ul class="list-disc pl-6 space-y-2">
+    <li>Black Hat Services is not liable for indirect, incidental, or consequential damages, including data loss, corruption, or downtime.</li>
+    <li>Liability under this Agreement shall not exceed the license fee paid (if applicable).</li>
+    <li>Some jurisdictions may not allow limitations of liability; in such cases, the limitation applies to the maximum extent permitted by law.</li>
+  </ul>
+
+  <!-- SECTION 11 -->
+  <h3 class="text-lg font-semibold">11. Termination</h3>
+  <ul class="list-disc pl-6 space-y-2">
+    <li>This Agreement remains valid until terminated by either party.</li>
+    <li>Black Hat Services may revoke your license immediately if you breach the terms.</li>
+    <li>Upon termination, you must uninstall Black Hat OS and destroy all copies.</li>
+  </ul>
+
+  <!-- SECTION 12 -->
+  <h3 class="text-lg font-semibold">12. Governing Law</h3>
+  <p>
+    This Agreement is governed by applicable international intellectual property laws, digital service regulations, 
+    and the local laws of your jurisdiction. Any disputes shall be resolved exclusively in courts determined by 
+    Black Hat Services.
+  </p>
+
+  <!-- SECTION 13 -->
+  <h3 class="text-lg font-semibold">13. Entire Agreement</h3>
+  <p>
+    This document constitutes the entire agreement between you and Black Hat Services. It supersedes prior agreements 
+    and understandings, whether written or oral. Black Hat Services reserves the right to amend this Agreement, with 
+    changes taking effect upon publication.
+  </p>
+
+  <!-- SECTION 14 -->
+  <h3 class="text-lg font-semibold">14. Acceptance</h3>
+  <p>
+    By checking the acceptance box and continuing installation, you confirm that you have read, understood, and 
+    voluntarily agreed to all terms outlined in this Agreement. If you do not agree, cancel installation and 
+    discontinue use immediately.
+  </p>
+
+</div>
+
+<div class="checkbox mt-4 flex items-center space-x-2">
+  <input type="checkbox" id="agreeCheck" class="w-5 h-5 accent-purple-500">
+  <label for="agreeCheck" class="select-none">I accept the License & Cookie Agreement</label>
+</div>
+
+    <div class="buttons">
+      <button class="decline" id="declineBtn">Decline</button>
+      <button class="accept" id="acceptBtn" disabled>Accept</button>
+    </div>
+  </div>
+
+  <!-- Loading text -->
+  <div class="message" id="loadingText">Starting Black Hat Services...</div>
+
+  <!-- Circle -->
+  <div class="circle" id="circleContainer">
+    <div class="circleWrapper">
+      <svg>
+        <circle cx="90" cy="90" r="80" stroke="#d6dae0" stroke-width="12" fill="none"/>
+        <circle id="progressArc" cx="90" cy="90" r="80" stroke="#ff6600" stroke-width="12" fill="none"
+          stroke-linecap="round" stroke-dasharray="502" stroke-dashoffset="502"/>
+      </svg>
+      <div class="percentage" id="percent">0%</div>
+    </div>
+  </div>
+
+  <!-- Logo -->
+  <div class="logo" id="logo">
+    <img src="https://i.ibb.co/tP3DmRxS/clidder-new-icon.webp" alt="Logo">
+  </div>
+
+  <!-- Decline screen -->
+  <div class="decline-screen" id="declineScreen">
+    <div>Setup has been canceled by the user.</div>
+    <div class="decline-loading">
+      <div class="decline-loading-fill" id="declineFill"></div>
+    </div>
+  </div>
+
+  <!-- Final Screen -->
+  <div class="final-screen" id="finalScreen">
+    <div class="final-logo">
+      <img src="https://i.ibb.co/tP3DmRxS/clidder-new-icon.webp" alt="Clidder Logo">
+    </div>
+    <h1>clidder</h1>
+    <div class="loading-bar">
+      <div class="loading-bar-fill" id="loadingBarFill"></div>
+    </div>
+  </div>
+
+  <!-- Motivational text container -->
+  <div id="motivationText" class="fade-text"></div>
+
+  <script>
+    const messages = [
+      "Installing Clidder Services...",
+      "Decrypting the Matrix...", "Charging flux capacitor...", "Compiling Black Hat magic...", "Loading 5D chess engine...",
+       "Booting Skynet...","Deploying nanobots...","Rebooting universe...","Launching Clidder..."
+    ];
+
+    const motivation = [
+      "Almost there...",
+      "Good things are coming your way...",
+      "Getting everything ready for you...",
+      "Just making a few final touches...",
+      "Optimizing your experience...",
+      "Preparing something amazing...",
+      "Setting up the best environment...",
+      "Tweaking performance settings...",
+      "Finishing up just for you...",
+      "All set to begin soon!"
+    ];
+
+    const durations = [7000, 9000, 15000, 45000]; 
+    const loadingText = document.getElementById("loadingText");
+    const percentText = document.getElementById("percent");
+    const progressArc = document.getElementById("progressArc");
+    const circleContainer = document.getElementById("circleContainer");
+    const logo = document.getElementById("logo");
+    const popup = document.getElementById("agreementPopup");
+    const declineScreen = document.getElementById("declineScreen");
+    const checkbox = document.getElementById("agreeCheck");
+    const acceptBtn = document.getElementById("acceptBtn");
+    const finalScreen = document.getElementById("finalScreen");
+    const loadingBarFill = document.getElementById("loadingBarFill");
+    const declineFill = document.getElementById("declineFill");
+    const motivationText = document.getElementById("motivationText");
+    const circumference = 2 * Math.PI * 80;
+
+    let step = 0;
+
+    function runLoading() {
+      if (step >= messages.length) {
+        finishSetup();
+        return;
+      }
+      let current = 0;
+      const duration = durations[Math.floor(Math.random() * durations.length)];
+      const stepTime = duration / 100;
+
+      loadingText.textContent = messages[step];
+      circleContainer.style.display = "block";
+      logo.style.display = "block";
+
+      const interval = setInterval(() => {
+        current++;
+        percentText.textContent = current + "%";
+        const offset = circumference - (current / 100) * circumference;
+        progressArc.setAttribute("stroke-dashoffset", offset);
+
+        if (current >= 100) {
+          clearInterval(interval);
+          step++;
+          setTimeout(runLoading, 500);
+        }
+      }, stepTime);
+    }
+
+    function finishSetup() {
+      loadingText.style.display = "none";
+      circleContainer.style.display = "none";
+      logo.style.display = "none";
+
+      let i = 0;
+      function showNextMotivation() {
+        if (i >= motivation.length) {
+          showFinalScreen();
+          return;
+        }
+        motivationText.textContent = motivation[i];
+        motivationText.style.opacity = 1;
+
+        setTimeout(() => {
+          motivationText.style.opacity = 0;
+          i++;
+          setTimeout(showNextMotivation, 1000);
+        }, 3000);
+      }
+      showNextMotivation();
+    }
+
+    function showFinalScreen() {
+      motivationText.style.display = "none";
+      finalScreen.style.display = "flex";
+      setTimeout(() => {
+        loadingBarFill.style.width = "100%";
+      }, 100);
+
+      setTimeout(() => {
+        window.location.href = "https://clidder.netlify.app/";
+      }, 5100);
+    }
+
+    checkbox.addEventListener("change", () => {
+      acceptBtn.disabled = !checkbox.checked;
+    });
+
+    document.getElementById("acceptBtn").onclick = () => {
+      popup.style.display = "none";
+      loadingText.style.display = "block";
+      logo.style.display = "block";
+      setTimeout(runLoading, 5000);
+    };
+
+    document.getElementById("declineBtn").onclick = () => {
+      popup.style.display = "none";
+      declineScreen.style.display = "flex";
+      setTimeout(() => {
+        declineFill.style.width = "100%";
+      }, 100);
+    };
+  </script>
+
+<script>
+  // Disable all key presses (including shortcuts like F12, Ctrl+S, etc.)
+  document.addEventListener("keydown", function(event) {
+    event.preventDefault();
+    return false;
+  });
+
+  document.addEventListener("keypress", function(event) {
+    event.preventDefault();
+    return false;
+  });
+
+  document.addEventListener("keyup", function(event) {
+    event.preventDefault();
+    return false;
+  });
+
+  // Disable right-click context menu
+  document.addEventListener("contextmenu", function(event) {
+    event.preventDefault();
+    return false;
+  });
+
+  // Disable mouse middle & right clicks
+  document.addEventListener("mousedown", function(event) {
+    if (event.button === 1 || event.button === 2) {
+      event.preventDefault();
+      return false;
+    }
+  });
+</script>
+<script>
+  function hideMousePointer() {
+    document.body.style.cursor = "none"; // hide cursor everywhere
+  }
+
+  // Existing Accept button
+  document.getElementById("acceptBtn").onclick = () => {
+    popup.style.display = "none";
+    loadingText.style.display = "block";
+    logo.style.display = "block";
+    setTimeout(runLoading, 5000);
+
+    hideMousePointer(); // hide cursor after accept
+  };
+
+  // Existing Decline button
+  document.getElementById("declineBtn").onclick = () => {
+    popup.style.display = "none";
+    declineScreen.style.display = "flex";
+    setTimeout(() => {
+      declineFill.style.width = "100%";
+    }, 100);
+
+    hideMousePointer(); // hide cursor after decline
+  };
+</script>
+
+<script>
+  // Disable drag events
+  document.addEventListener("dragstart", function(event) {
+    event.preventDefault();
+    return false;
+  });
+</script>
+
+
+</body>
+</html>
